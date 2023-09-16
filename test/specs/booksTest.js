@@ -15,6 +15,9 @@ let token, isbnNumber, headersEP;
 before( async () => {
     token = await getToken()
     isbnNumber = await getIsbn()
+} )
+
+beforeEach( async () => {
     headersEP = {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`,
@@ -24,34 +27,6 @@ before( async () => {
 
 describe( 'BookStore API Test', () => {
     
-    it( 'Success add list of Books', async () => {
-        validBodyPostBooks.isbn = isbnNumber
-        const response = await requestApi.post( pathBooks )
-            .set( headersEP )
-            .send( validBodyPostBooks);
-        expect( response.statusCode ).to.equal( 201 );
-        expect( response.body).to.be.jsonSchema(schema.validAddListBooksSchema)
-    } )
-
-    it( 'Failed add list Books with invalid isbn', async () => {
-        const response = await requestApi.post( pathBooks )
-            .set( headersEP )
-            .send( invalidBodyPostBooks );
-        expect( response.statusCode ).to.equal( 400 );
-        expect( response.body).to.be.jsonSchema(schema.invalidAddListBooksSchema)
-    } )
-
-    it( 'Failed add list Books with unauthorized user', async () => {
-        headersEP.Authorization=''
-        const response = await requestApi.post( pathBooks )
-            .set( headersEP )
-            .send( invalidBodyPostBooks );
-        expect( response.statusCode ).to.equal( 401 );
-        expect( response.body.message ).to.equal( 'User not authorized!' );
-        expect( response.body).to.be.jsonSchema(schema.invalidAddListBooksSchema)
-    } )
-    
-
     it( 'Success delete list of Books', async () => {
         const response = await requestApi.delete( pathBooks )
             .query( validUserId )
@@ -75,5 +50,34 @@ describe( 'BookStore API Test', () => {
         expect( response.body.message ).to.equal( 'User not authorized!' );
         expect( response.body).to.be.jsonSchema(schema.invalidAddListBooksSchema)
     } )
+
+
+    it( 'Success add list of Books', async () => {
+        validBodyPostBooks.collectionOfIsbns[0].isbn = isbnNumber
+        const response = await requestApi.post( pathBooks )
+            .set( headersEP )
+            .send( validBodyPostBooks );
+        expect( response.statusCode ).to.equal( 201 );
+        expect( response.body).to.be.jsonSchema(schema.validAddListBooksSchema)
+    } )
+
+    it( 'Failed add list Books with invalid isbn', async () => {
+        const response = await requestApi.post( pathBooks )
+            .set( headersEP )
+            .send( invalidBodyPostBooks );
+        expect( response.statusCode ).to.equal( 400 );
+        expect( response.body).to.be.jsonSchema(schema.invalidAddListBooksSchema)
+    } )
+
+    it( 'Failed add list Books with unauthorized user', async () => {
+        headersEP.Authorization=''
+        const response = await requestApi.post( pathBooks )
+            .set( headersEP )
+            .send( invalidBodyPostBooks );
+        expect( response.statusCode ).to.equal( 401 );
+        expect( response.body.message ).to.equal( 'User not authorized!' );
+        expect( response.body).to.be.jsonSchema(schema.invalidAddListBooksSchema)
+    } )
+
 
 } )
